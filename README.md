@@ -1,48 +1,119 @@
-# Db-Mysql-lanchonete
-# 🍔 Sistema de Banco de Dados para Lanchonete
+# 📊 Banco de Dados - Lanchonete e Consultas
 
-Este projeto foi desenvolvido como parte dos meus estudos em SQL, utilizando o **MySQL Workbench**, com o objetivo de criar um sistema completo de gerenciamento para uma lanchonete. O projeto simula a operação de um negócio real, com foco em modelagem de dados, relacionamento entre tabelas e inserção de dados em massa.
-
----
-
-## 🛠️ Tecnologias Utilizadas
-- **MySQL Workbench** (ambiente de desenvolvimento)
-- **SQL** (linguagem para criação e manipulação do banco de dados)
+Este projeto contém um banco de dados relacional para gerenciar **funcionários, clientes, produtos e pedidos** de uma lanchonete.  
+O objetivo é fornecer um modelo completo que permita **cadastro, controle e análise de operações** do negócio.
 
 ---
 
-## 📦 Estrutura do Banco de Dados
+## 📂 Estrutura do Banco de Dados
 
-O banco de dados `lanchonete` foi construído com as seguintes tabelas:
+### 🧑 Funcionários (`funcionarios`)
+Armazena dados dos colaboradores da lanchonete.
+- `id_funcionario` (PK)
+- `nome`
+- `cpf`
+- `data_nascimento`
+- `endereço`
+- `telefone`
+- `email`
+- `cargo`
+- `salario`
+- `data_admissao`
 
-- `funcionarios`: informações pessoais, cargos e salários dos colaboradores
-- `clientes`: cadastro de clientes
-- `produtos`: cardápio da lanchonete com preços e categorias
-- `info_produtos`: ingredientes e fornecedores dos produtos
-- `pedidos`: pedidos realizados, com data, status e vínculo com clientes e funcionários
+### 👥 Clientes (`clientes`)
+Informações de clientes cadastrados.
+- `id_cliente` (PK)
+- `nome`
+- `cpf`
+- `data_nascimento`
+- `endereço`
+- `telefone`
+- `email`
+- `data_cadastro`
+
+### 🍽️ Produtos (`produtos`)
+Catálogo de produtos da lanchonete.
+- `id_produto` (PK)
+- `nome`
+- `descrição`
+- `preço`
+- `categoria`
+
+### 🧾 Pedidos (`pedidos`)
+Registra os pedidos realizados, vinculando cliente, funcionário e produto.
+- `id_pedido` (PK)
+- `id_cliente` (FK → clientes)
+- `id_funcionario` (FK → funcionarios)
+- `id_produto` (FK → produtos)
+- `quantidade`
+- `preco`
+- `data_pedido`
+- `status`
+
+### 📦 Informações de Produtos (`info_produtos`)
+Detalhes adicionais de cada produto.
+- `id_info` (PK)
+- `id_produto` (FK → produtos)
+- `ingredientes`
+- `fornecedor`
 
 ---
 
-## ✨ Funcionalidades Desenvolvidas
+## 📊 Exemplos de Consultas SQL
 
-- Criação de todas as tabelas com **chaves primárias e estrangeiras**
-- Inserção de dados realistas com mais de **30 registros de clientes e pedidos**
-- Definição de relacionamentos complexos entre tabelas (JOINs)
-- Simulação de operações reais de um sistema de pedidos
-
----
-
-## 📊 Exemplos de Consultas
-
+- Listar todos os pedidos com informações de cliente, funcionário e produto:
 ```sql
--- Produtos e seus fornecedores
-SELECT p.nome, i.fornecedor
-FROM produtos p
-JOIN info_produtos i ON p.id_produto = i.id_produto;
+SELECT pe.id_pedido, pe.quantidade, pe.data_pedido,
+       c.nome AS nome_cliente, f.nome AS nome_funcionario,
+       p.nome AS nome_produto, p.preço
+FROM pedidos pe
+JOIN clientes c ON pe.id_cliente = c.id_cliente
+JOIN funcionarios f ON pe.id_funcionario = f.id_funcionario
+JOIN produtos p ON pe.id_produto = p.id_produto;
+```
 
--- Pedidos pendentes
-SELECT * FROM pedidos WHERE status = 'Pendente';
+- Calcular a média de preços por categoria:
+```sql
+SELECT categoria, ROUND(AVG(preco),2) AS media_preco
+FROM produtos
+GROUP BY categoria;
+```
 
--- Funcionários com salário acima de R$ 3.000
-SELECT nome, cargo, salario FROM funcionarios WHERE salario > 3000;
+- Buscar clientes que nunca fizeram pedido:
+```sql
+SELECT c.nome
+FROM clientes c
+LEFT JOIN pedidos p ON c.id_cliente = p.id_cliente
+WHERE p.id_pedido IS NULL;
+```
 
+---
+
+## 🛠️ Funções e Views Implementadas
+
+- **View `resumo_pedido`** → resumo de cada pedido (cliente, funcionário, produto e total).  
+- **Função `BuscaIngredientesProduto(id_produto)`** → retorna a lista de ingredientes de um produto.  
+- **Função `mediaPedido(id_pedido)`** → compara o valor do pedido com a média dos demais pedidos.
+
+---
+
+## 🚀 Como Usar
+
+1. Crie o banco de dados:
+```sql
+CREATE DATABASE Lanchonete;
+USE Lanchonete;
+```
+
+2. Execute o script `Db (Lanchonete e Consultas).sql` para criar as tabelas e inserir os dados.
+
+3. Explore as tabelas e consultas sugeridas para análise.
+
+---
+
+## 📌 Observações
+
+- Os dados de exemplo incluem **funcionários, clientes, produtos, pedidos e fornecedores** fictícios.  
+- O banco pode ser expandido com relatórios e dashboards conectados a ferramentas de análise como **Power BI, Tableau ou Python (Pandas/SQLAlchemy)**.
+
+---
